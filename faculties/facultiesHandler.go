@@ -8,7 +8,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-//Show all the Faculties for a specific id
+//ShowFaculties : Show all the Faculties for a specific id
 func ShowFaculties(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	CO.AddSafeHeaders(&w)
 	var schoolID int64
