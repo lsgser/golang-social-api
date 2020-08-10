@@ -31,3 +31,16 @@ CREATE TABLE `profiles` (
 	KEY `profiles_user_id_index` (`user_id`),
 	CONSTRAINT `profiles_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+DROP TABLE IF EXISTS `faculties`;
+
+CREATE TABLE `faculties` (
+	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	`school_id` bigint(20) unsigned NOT NULL,
+	`faculty` varchar(255) NOT NULL,
+	`created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+	PRIMARY KEY (`id`),
+	KEY `faculties_school_id_foreign` (`school_id`),
+	CONSTRAINT `faculties_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
