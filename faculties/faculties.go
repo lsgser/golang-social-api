@@ -14,7 +14,7 @@ type Faculty struct {
 }
 
 //GetAllFaculties : returns all faculties based on the school id integer that's provided
-func GetAllFaculties(SchoolID int64) (Faculty, error) {
+func GetAllFaculties(schoolID int64) (Faculty, error) {
 
 	faculty := Faculty{}
 	database, errors := CO.GetDB()
@@ -23,14 +23,14 @@ func GetAllFaculties(SchoolID int64) (Faculty, error) {
 		return faculty, errors
 	}
 	//rows, errors := database.Query("SELECT school_id, faculty FROM faculties WHERE school_id=?", schoolID)
-	statement, errors := database.Prepare("SELECT school_id,faculty FROM faculties WHERE school_id=?")
+	statement, errors := database.Prepare("SELECT faculty FROM faculties WHERE school_id=?")
 
 	if errors != nil {
 		return faculty, errors
 	}
 	// defer rows.Close()
 	defer statement.Close()
-	errors = statement.QueryRow(faculty).Scan(&faculty.SchoolID, &faculty.Faculties)
+	errors = statement.QueryRow(schoolID).Scan(&faculty.SchoolID, &faculty.Faculties)
 	// for rows.Next() {
 	// 	errors := rows.Scan(&faculty.SchoolID, &faculty.Faculties)
 	// 	if errors != nil {
