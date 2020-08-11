@@ -44,3 +44,43 @@ func GetAllFaculties(schoolID int64) (Faculty, error) {
 
 	return faculty, nil
 }
+
+//GetFaculty :  returns the faculty data
+func GetFaculty(facultyName string, schoolid int64) (Faculty, error) {
+
+	facultyData := Faculty{}
+	database, errors := CO.GetDB()
+
+	if errors != nil {
+		return facultyData, errors
+	}
+
+	schoolidQuery, errors := database.Prepare("SELECT faculty FROM faculties WHERE school_id=?")
+
+	if errors != nil {
+		return facultyData, errors
+	}
+	defer schoolidQuery.Close()
+
+	errors = schoolidQuery.QueryRow(schoolid).Scan(&facultyName)
+
+	if errors != nil {
+		return facultyData, errors
+	}
+
+	facultyNameQuery, errors := database.Prepare("SELECT * FROM faculties WHERE faculty=?")
+
+	if errors != nil {
+		return facultyData, errors
+	}
+
+	defer facultyNameQuery.Close()
+
+	errors = facultyNameQuery.QueryRow(facultyName).Scan(&facultyData.ID, &facultyData.SchoolID, &facultyData.Faculties, &facultyData.CreatedAt, &facultyData.UpdatedAt)
+
+	if errors != nil {
+		return facultyData, errors
+	}
+
+	return facultyData, nil
+}
