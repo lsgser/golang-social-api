@@ -1,86 +1,93 @@
 package faculties
 
 import (
+	"errors"
+	"log"
+
 	CO "../config"
 )
 
 //Faculty struct
 type Faculty struct {
 	ID        int64  `json:"id,omitempty"`
-	SchoolID  int64  `json:"school_id,omitempty"`
-	Faculties string `json:"faculty,omitempty"`
+	School    int64  `json:"school,omitempty"`  /*University name*/
+	Faculty   string `json:"faculty,omitempty"` /*string type so this it the name of the faculty i.e Engineering*/
 	CreatedAt string `json:"created_at,omitempty"`
 	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
-//GetAllFaculties : returns all faculties based on the school id integer that's provided
-func GetAllFaculties(schoolID int64) (Faculty, error) {
+//NewFaculty :  returns a pointer struct of a Faculty type
+func NewFaculty() *Faculty {
+	return new(Faculty)
+}
 
-	faculty := Faculty{}
-	database, errors := CO.GetDB()
+//GetFaculties : returns all faculties based on the school id integer that's provided
+func GetFaculties(s int64) ([]Faculty, error) {
 
-	if errors != nil {
-		return faculty, errors
+	faculties := make([]Faculty, 0)
+	database, err := CO.GetDB()
+
+	if err != nil {
+		err = errors.New("DB connection error")
+		return faculties, err
 	}
-	//rows, errors := database.Query("SELECT school_id, faculty FROM faculties WHERE school_id=?", schoolID)
-	statement, errors := database.Prepare("SELECT faculty FROM faculties WHERE school_id=?")
+	rows, err := database.Query("SELECT school_id, faculty FROM faculties WHERE school_id=?", s)
+	//statement, errors := database.Prepare("SELECT faculty FROM faculties WHERE school_id=?")
 
-	if errors != nil {
-		return faculty, errors
+	if err != nil {
+		return faculties, err
 	}
-	// defer rows.Close()
-	defer statement.Close()
-	errors = statement.QueryRow(schoolID).Scan(&faculty.SchoolID, &faculty.Faculties)
-	// for rows.Next() {
-	// 	errors := rows.Scan(&faculty.SchoolID, &faculty.Faculties)
-	// 	if errors != nil {
-	// 		return faculty, errors
-	// 	}
-	// }
-	// errors = rows.Err()
-	if errors != nil {
-		return faculty, errors
+	defer rows.Close()
+
+	for rows.Next() {
+		faculty := Faculty{}
+		rows.Scan(&faculty.ID, &faculty.School, &faculty.Faculty, &faculty.CreatedAt, &faculty.UpdatedAt)
+		faculties = append(faculties, faculty)
 	}
 
-	return faculty, nil
+	log.Println("Faculties :", faculties)
+	return faculties, nil
 }
 
 //GetFaculty :  returns the faculty data
-func GetFaculty(facultyName string, schoolid int64) (Faculty, error) {
+func GetFaculty(f int64) (Faculty, error) {
 
-	facultyData := Faculty{}
-	database, errors := CO.GetDB()
+	faculty := Faculty{}
 
-	if errors != nil {
-		return facultyData, errors
+	database, err := CO.GetDB()
+
+	if err != nil {
+		err := errors.New("DB connection error")
+		return faculty, err
 	}
 
-	schoolidQuery, errors := database.Prepare("SELECT faculty FROM faculties WHERE school_id=?")
+	schoolidQuery, err := database.Prepare("SELECT faculty FROM faculties WHERE school_id=?")
 
-	if errors != nil {
-		return facultyData, errors
+	if err != nil {
+		return faculty, err
 	}
+
 	defer schoolidQuery.Close()
 
-	errors = schoolidQuery.QueryRow(schoolid).Scan(&facultyName)
+	err = schoolidQuery.QueryRow(f).Scan(&faculty.Faculty)
 
-	if errors != nil {
-		return facultyData, errors
+	if err != nil {
+		return faculty, err
 	}
 
-	facultyNameQuery, errors := database.Prepare("SELECT * FROM faculties WHERE faculty=?")
+	// facultyQuery, err := database.Prepare("SELECT * FROM faculties WHERE id=?")
 
-	if errors != nil {
-		return facultyData, errors
-	}
+	// if err != nil {
+	//    return facultyQuery, err
+	// }
 
-	defer facultyNameQuery.Close()
+	// defer facultyQuery.Close()
 
-	errors = facultyNameQuery.QueryRow(facultyName).Scan(&facultyData.ID, &facultyData.SchoolID, &facultyData.Faculties, &facultyData.CreatedAt, &facultyData.UpdatedAt)
+	// err = facultyQuery.QueryRow(ID).Scan(&faculty.ID, &faculty.School, &faculty.Faculty, &faculty.CreatedAt, &faculty.UpdatedAt)
 
-	if errors != nil {
-		return facultyData, errors
-	}
+	// if err != nil {
+	// 	return faculty, err
+	// }
 
-	return facultyData, nil
+	return faculty, nil
 }

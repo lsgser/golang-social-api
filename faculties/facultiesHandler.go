@@ -4,74 +4,77 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"strconv"
+
 	CO "../config"
 	"github.com/julienschmidt/httprouter"
 )
 
 //ShowFaculties : Show all the Faculties for a specific id
-func ShowFaculties(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+func ShowFaculties(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	CO.AddSafeHeaders(&w)
-	schoolID = p.ByName("id") // change this back to an integer with strconv ??
-	faculties, errors := GetAllFaculties(schoolID)
 
-	if errors != nil {
-		w.WriteHeader(500)
-		w.Write([]byte(`{"status":"` + errors.Error() + `"}`))
+	school, err := strconv.Atoi(params.ByName("s"))
+
+	if school == 0 {
+		w.WriteHeader(400)
+		w.Write([]byte(`{"status":"ID was not provided"}`))
 		return
 	}
-	errors = json.NewEncoder(w).Encode(faculties)
 
-	if errors != nil {
+	if err != nil {
 		w.WriteHeader(500)
-		w.Write([]byte(`{"status":"Something went wrong"}`))
+		w.Write([]byte(`{"status":"` + err.Error() + `"}`))
+		return
+	}
+
+	faculties, err := GetFaculties(int64(school))
+
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(`{"status":"` + err.Error() + `"}`))
+		return
+	}
+	err = json.NewEncoder(w).Encode(faculties)
+
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(`{"status":"` + err.Error() + `"}`))
 		return
 	}
 }
 
-//
-
-func ShowFaculty(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+//ShowFaculty : displays a single faculty based on their faculty id
+func ShowFaculty(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	CO.AddSafeHeaders(&w)
-	facultyName := p.ByName("s")
-	schoolID = p.ByName("id") // change this back to an integer with strconv ??
+	school, err := strconv.Atoi(params.ByName("f")) // change this back to an integer with strconv ??
 	//schoolID = strconv.ParseInt(req.FormValue("s"),10,64) ??
 
-	if schoolID == "" { // change the empty string to a value ??
+	if school == 0 { // change the empty string to a value ??
 		w.WriteHeader(400)
 		w.Write([]byte(`{"status":"school id was not provided"}`))
 		return
 	}
-
-	if facultyName == "" {
+	if err != nil {
 		w.WriteHeader(400)
-		w.Write([]byte(`{"status":"Faculty name was not provided"}`))
-		return
-	}
-	faculties, errors := GetFaculty(facultyName, schoolID)
-
-	if errors != nil {
-		w.WriteHeader(400)
-		w.Write([]byte(`{"status":"` + errors.Error() + `"}`))
+		w.Write([]byte(`{"status":"` + err.Error() + `"}`))
 		return
 	}
 
-	getfaculty, errors := GetFaculty(facultyName, schoolID)
+	faculties, err := GetFaculty(int64(school))
 
-	if errors != nil {
+	if err != nil {
 		w.WriteHeader(400)
-		w.Write([]byte(`{"status":"` + errors.Error() + `"}`))
+		w.Write([]byte(`{"status":"` + err.Error() + `"}`))
 		return
 	}
-	errors = json.NewEncoder(w).Encode(faculties)
-	if errors != nil {
+
+	err = json.NewEncoder(w).Encode(faculties)
+
+	if err != nil {
 		w.WriteHeader(400)
-		w.Write([]byte(`{"status":"` + errors.Error() + `"}`))
+		w.Write([]byte(`{"status":"` + err.Error() + `"}`))
 		return
 	}
-	errors = json.NewEncoder(w).Encode(getfaculty)
-	if errors != nil {
-		w.WriteHeader(400)
-		w.Write([]byte(`{"status":"` + errors.Error() + `"}`))
-		return
-	}
+
 }

@@ -21,6 +21,7 @@ func NewRouter() *httprouter.Router {
 	router.GET("/profile/:u", P.ShowProfile)
 	router.POST("/addprofile", P.AddProfile)
 	//Faculties
-	router.GET("/faculties/:id", F.ShowFaculties)
+	router.GET("/faculties/:s", F.ShowFaculties)
+	router.GET("/faculty/:f", F.ShowFaculty)
 	return router
 }
