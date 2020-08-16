@@ -41,7 +41,7 @@ func GetFaculties(s int64) ([]Faculty, error) {
 
 	for rows.Next() {
 		faculty := Faculty{}
-		rows.Scan(&faculty.ID, &faculty.School, &faculty.Faculty, &faculty.CreatedAt, &faculty.UpdatedAt)
+		rows.Scan(&faculty.School, &faculty.Faculty)
 		faculties = append(faculties, faculty)
 	}
 
